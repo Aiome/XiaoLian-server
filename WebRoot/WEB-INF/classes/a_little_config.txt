@@ -1,0 +1,4 @@
+jdbcUrl = jdbc:mysql://127.0.0.1/xiaolian?characterEncoding=utf8&amp;&zeroDateTimeBehavior=convertToNull
+user = root
+password =
+devMode = true
