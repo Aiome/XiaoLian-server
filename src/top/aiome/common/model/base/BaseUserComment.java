@@ -41,11 +41,11 @@ public abstract class BaseUserComment<M extends BaseUserComment<M>> extends Mode
 		return get("score");
 	}
 
-	public void setUserId(java.lang.Integer userId) {
+	public void setUserId(java.lang.String userId) {
 		set("userId", userId);
 	}
 
-	public java.lang.Integer getUserId() {
+	public java.lang.String getUserId() {
 		return get("userId");
 	}
 

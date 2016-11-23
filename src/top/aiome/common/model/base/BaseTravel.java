@@ -49,4 +49,20 @@ public abstract class BaseTravel<M extends BaseTravel<M>> extends Model<M> imple
 		return get("trivalTime");
 	}
 
+	public void setFlag(java.lang.Integer flag) {
+		set("flag", flag);
+	}
+
+	public java.lang.Integer getFlag() {
+		return get("flag");
+	}
+
+	public void setPathPic(java.lang.String pathPic) {
+		set("pathPic", pathPic);
+	}
+
+	public java.lang.String getPathPic() {
+		return get("pathPic");
+	}
+
 }

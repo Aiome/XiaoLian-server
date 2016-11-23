@@ -129,4 +129,12 @@ public abstract class BaseUser<M extends BaseUser<M>> extends Model<M> implement
 		return get("creatDate");
 	}
 
+	public void setStars(java.lang.Integer stars) {
+		set("stars", stars);
+	}
+
+	public java.lang.Integer getStars() {
+		return get("stars");
+	}
+
 }
