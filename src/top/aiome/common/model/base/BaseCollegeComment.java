@@ -49,11 +49,11 @@ public abstract class BaseCollegeComment<M extends BaseCollegeComment<M>> extend
 		return get("image");
 	}
 
-	public void setUserId(java.lang.Integer userId) {
+	public void setUserId(java.lang.String userId) {
 		set("userId", userId);
 	}
 
-	public java.lang.Integer getUserId() {
+	public java.lang.String getUserId() {
 		return get("userId");
 	}
 

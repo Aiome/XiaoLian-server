@@ -1,6 +1,7 @@
 
 package top.aiome.api;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import com.jfinal.aop.Before;
@@ -11,8 +12,11 @@ import top.aiome.common.Require;
 import top.aiome.common.bean.Code;
 import top.aiome.common.bean.DatumResponse;
 import top.aiome.common.model.Match;
+import top.aiome.common.model.Travel;
 import top.aiome.common.model.User;
+import top.aiome.common.token.TokenManager;
 import top.aiome.common.utils.RandomUtils;
+import top.aiome.common.utils.StringUtils;
 import top.aiome.interceptor.TokenInterceptor;
 
 @Before(TokenInterceptor.class)
@@ -77,8 +81,8 @@ public class MatchAPIController extends BaseAPIController{
     			.put(result,"user choose result can not be null"))){
     		return;
     	}
-		//从Match表查出用户id=userid and 导游id = guiderid的记录 状态置为2 
-		String sql = "select * from `match` where userId=? and guiderId=? and flag=1";
+		//从Match表查出用户id=userid and 导游id = guiderid的记录 
+		String sql = "SELECT * FROM `match` where userId=? and guiderId=? and flag=1 AND travelId NOT IN(SELECT travelId FROM travel)";
 		Match match = Match.dao.findFirst(sql,userId,guiderId);
 		
 		if(match == null){
@@ -88,15 +92,31 @@ public class MatchAPIController extends BaseAPIController{
 		
 		if(result.equals("0")){
 			match.setCurrent(Match.CODE_FAIL_USER_REFUSE);
-			//将记录置为不可用状态(作为用户获取消息列表时的查询条件)
-			match.setFlag(false);
 		}else if(result.equals("1")){
 			match.setCurrent(Match.CODE_USER_ACCEPT);
+			
+			//匹配成功    创建出游记录
+			String travelId = match.getTravelId();
+			String userId2 = match.getUserId();
+			String guilderId = match.getGuiderId();
+			String schoolId = match.getSchoolId();
+			Date travelTime = match.getTime();
+			Boolean flag = true;
+			new Travel()
+					.set("travelId", travelId)
+					.set("userId", userId2)
+					.set("guiderId", guilderId)
+					.set("travelTime", travelTime)
+					.set("flag", flag)
+					.set("schoolId", schoolId)
+					.save();
 		}else{
 			renderArgumentError("result is not valid");
 			return;
 		}
 		match.update();
+		
+		
 		
 		//将结果推送至导游用户
 		/**
@@ -139,7 +159,7 @@ public class MatchAPIController extends BaseAPIController{
     		return;
     	}
 		//从Match表查出用户id=userid and 导游id = guiderid的记录 状态置为2 
-		String sql = "select * from `match` where userId=? and guiderId=? and flag=1";
+		String sql = "SELECT * FROM `match` where userId=? and guiderId=? and flag=1 AND travelId NOT IN(SELECT travelId FROM travel)";
 		Match match = Match.dao.findFirst(sql,userId,guiderId);
 		
 		if(match == null){
@@ -195,6 +215,8 @@ public class MatchAPIController extends BaseAPIController{
 		String constellation = getPara("constellation");
 		String birthdayMin = getPara("birthdayMin");
 		String birthdayMax = getPara("birthdayMax");
+		String remark = getPara("remark");
+		String time = getPara("time");
 		
 		if(!notNull(Require.me()
     			.put(sex, "sex password can not be null")
@@ -203,7 +225,8 @@ public class MatchAPIController extends BaseAPIController{
     			.put(enrollment, "enrollment can not be null")
     			.put(constellation, "constellation can not be null")
     			.put(birthdayMin, "min birthday can not be null")
-    			.put(birthdayMax, "max birthday can not be null"))){
+    			.put(birthdayMax, "max birthday can not be null")
+    			.put(time, "time can not be null"))){
     		return;
     	}
 		//筛选出符合条件的用户
@@ -212,18 +235,23 @@ public class MatchAPIController extends BaseAPIController{
 		
 		//保存数据
 		String userId = getUser().userId();
+		String travelId = RandomUtils.randomCustomUUID();
 		for(int i = 0; i < lo.size(); i++){
 			new Match()
 					.set("matchId", RandomUtils.randomCustomUUID())
 					.set("userId", userId)
 					.set("guiderId", lo.get(i).getUserId())
+					.set("schoolId", schoolId)
 					.set("flag", 1)
 					.set("current", "1")
+					.set("time", time)
+					.set("remark", remark)
+					.set("travelId", travelId)
 					.save();
 		}
 		
 		//将发送请求的出游者匹配状态置为不能匹配
-		getUser().set("flag",0).update();
+		getUser().set("flag",false).update();
 		
 		//推送消息
 			/**

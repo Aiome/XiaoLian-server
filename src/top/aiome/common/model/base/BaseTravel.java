@@ -9,12 +9,12 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings("serial")
 public abstract class BaseTravel<M extends BaseTravel<M>> extends Model<M> implements IBean {
 
-	public void setTrivalId(java.lang.String trivalId) {
-		set("trivalId", trivalId);
+	public void setTravelId(java.lang.String travelId) {
+		set("travelId", travelId);
 	}
 
-	public java.lang.String getTrivalId() {
-		return get("trivalId");
+	public java.lang.String getTravelId() {
+		return get("travelId");
 	}
 
 	public void setUserId(java.lang.String userId) {
@@ -41,12 +41,28 @@ public abstract class BaseTravel<M extends BaseTravel<M>> extends Model<M> imple
 		return get("schoolId");
 	}
 
-	public void setTrivalTime(java.util.Date trivalTime) {
-		set("trivalTime", trivalTime);
+	public void setTravelTime(java.util.Date travelTime) {
+		set("travelTime", travelTime);
 	}
 
-	public java.util.Date getTrivalTime() {
-		return get("trivalTime");
+	public java.util.Date getTravelTime() {
+		return get("travelTime");
+	}
+
+	public void setFlag(java.lang.Boolean flag) {
+		set("flag", flag);
+	}
+
+	public java.lang.Boolean getFlag() {
+		return get("flag");
+	}
+
+	public void setPathPic(java.lang.String pathPic) {
+		set("pathPic", pathPic);
+	}
+
+	public java.lang.String getPathPic() {
+		return get("pathPic");
 	}
 
 }
