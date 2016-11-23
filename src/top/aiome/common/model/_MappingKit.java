@@ -16,13 +16,15 @@ import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 public class _MappingKit {
 
 	public static void mapping(ActiveRecordPlugin arp) {
+		arp.addMapping("allocateprize", "allocatePrizeId", Allocateprize.class);
 		arp.addMapping("college", "coid", College.class);
 		arp.addMapping("college_comment", "commentId", CollegeComment.class);
 		arp.addMapping("major", "scid", Major.class);
 		arp.addMapping("match", "matchId", Match.class);
 		arp.addMapping("province", "pid", Province.class);
+		arp.addMapping("remainprize", "remainPrizeId", Remainprize.class);
 		arp.addMapping("sms", "smsId", Sms.class);
-		arp.addMapping("travel", "trivalId", Travel.class);
+		arp.addMapping("travel", "travelId", Travel.class);
 		arp.addMapping("user", "userId", User.class);
 		arp.addMapping("user_comment", "commentId", UserComment.class);
 	}

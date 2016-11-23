@@ -2,7 +2,7 @@
 <root>
     <resource>
         <!--文件下载的地址前缀-->
-        <prefix>http://mlongbo.com/upload</prefix>
+        <prefix>http://aiome.top/upload</prefix>
         <!--标记是否将上传的文件存储在应用目录，如tomcat. 1表示是，0表示否-->
         <appPath>1</appPath>
         <!--上传文件存储目录, 如果appPath值为0,需填写目录的绝对路径，否则填写应用目录的相对路径-->
