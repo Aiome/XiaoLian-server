@@ -26,7 +26,7 @@ public class FileAPIController extends BaseAPIController {
 	 * 处理单文件或多文件上传，上传成功后，返回url集合
 	 */
 	public void upload(){
-        if (methodType("post")) {
+        if (!methodType("post")) {
             render404();
             return;
         }

@@ -24,9 +24,8 @@ public class _MappingKit {
 		arp.addMapping("province", "pid", Province.class);
 		arp.addMapping("remainprize", "remainPrizeId", Remainprize.class);
 		arp.addMapping("sms", "smsId", Sms.class);
-		arp.addMapping("travel", "trivalId", Travel.class);
-		// Composite Primary Key order: stars,userId
-		arp.addMapping("user", "stars,userId", User.class);
+		arp.addMapping("travel", "travelId", Travel.class);
+		arp.addMapping("user", "userId", User.class);
 		arp.addMapping("user_comment", "commentId", UserComment.class);
 	}
 }

@@ -49,11 +49,11 @@ public abstract class BaseMatch<M extends BaseMatch<M>> extends Model<M> impleme
 		return get("current");
 	}
 
-	public void setTime(java.lang.String time) {
+	public void setTime(java.util.Date time) {
 		set("time", time);
 	}
 
-	public java.lang.String getTime() {
+	public java.util.Date getTime() {
 		return get("time");
 	}
 
@@ -71,6 +71,14 @@ public abstract class BaseMatch<M extends BaseMatch<M>> extends Model<M> impleme
 
 	public java.lang.String getTravelId() {
 		return get("travelId");
+	}
+
+	public void setSchoolId(java.lang.String schoolId) {
+		set("schoolId", schoolId);
+	}
+
+	public java.lang.String getSchoolId() {
+		return get("schoolId");
 	}
 
 }
