@@ -21,6 +21,13 @@ import top.aiome.interceptor.TokenInterceptor;
 
 @Before(TokenInterceptor.class)
 public class MatchAPIController extends BaseAPIController{
+	//发出请求
+	//导游确认
+	//出游者确认
+	//获取出游聊天列表
+	//获取导游聊天列表	
+	//从聊天列表删除联系人
+	
 	/**
 	 * 1.客户端提交出游用户数据(userId,条件，token)   start() post
 	 * 		条件:性别、学校、专业、入学年份、星座、年龄段
@@ -37,33 +44,46 @@ public class MatchAPIController extends BaseAPIController{
 	 * 		条件：导游id，确认结果
 	 * 		将匹配数据从匹配表删除
 	 */
-	
-	public void broadCast(){
-		Demo demo = new Demo("5829681dc62dca3f23000268", "tdysojgula4sscr2tnmf1alxigznqwzd");
-		try {
-			demo.sendAndroidBroadcast("广播title", "广播内容");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		renderText("推送成功");
+	public void guiderChatList(){
+		User guider = getUser();
+		String guiderId = guider.getUserId();
+		String travelIdGuider = guider.getTravelIdGuider();
+		//若用户还未担任过导游，则没有聊天列表
+		if(!notNull(Require.me()
+    			.put(travelIdGuider, "user has not served as a guide"))){
+    		return;
+    	}
+		String sql = "SELECT * FROM `match` where userId=? and travelIdGuider=? and flagUser=1";
+		List<Match> lm = Match.dao.find(sql,guiderId,travelIdGuider);
 	}
-	public void customPush(){
-		String alias = getPara("alias");
-		Demo demo = new Demo("5829681dc62dca3f23000268", "tdysojgula4sscr2tnmf1alxigznqwzd");
-		try {
-			demo.sendAndroidCustomizedcast(alias, "SINA_WEIBO", "标题", "自定义推送:" + alias);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		renderText("推送成功:" + alias);
+	/**
+	 * 获取出游者聊天列表
+	 */
+	public void userChatList(){
+		
+		User user = getUser();
+		String userId = user.getUserId();
+		String travelIdUser = user.getTravelIdUser();
+		//若用户还未发出过请求，则没有聊天列表
+		if(!notNull(Require.me()
+    			.put(travelIdUser, "user has not yet issued a request"))){
+    		return;
+    	}
+		String sql = "SELECT * FROM `match` where userId=? and travelIdUser=? and flagGuider=1";
+		List<Match> lm = Match.dao.find(sql,userId,travelIdUser);
+		
+		DatumResponse response = new DatumResponse();
+		if(lm.isEmpty()){
+        	response.setCode(Code.FAIL).setMessage("not found available chat list");
+        }else {
+        	response.setDatum(lm);
+        }
+        renderJson(response);		
+        
 	}
-	public void end(){
-		String sql = "select * from `match` where userId=? and flag=1";
-		Match match = Match.dao.findFirst(sql,getUser().getUserId());
-		match.set("flag", 0);
-	}
+	/**
+	 * 出游者再次确认
+	 */
 	public void matchEnd(){
 		String method = getRequest().getMethod();
 		if ("post".equalsIgnoreCase(method)) { 
@@ -82,7 +102,7 @@ public class MatchAPIController extends BaseAPIController{
     		return;
     	}
 		//从Match表查出用户id=userid and 导游id = guiderid的记录 
-		String sql = "SELECT * FROM `match` where userId=? and guiderId=? and flag=1 AND travelId NOT IN(SELECT travelId FROM travel)";
+		String sql = "SELECT * FROM `match` where userId=? and guiderId=? AND travelId NOT IN(SELECT travelId FROM travel)";
 		Match match = Match.dao.findFirst(sql,userId,guiderId);
 		
 		if(match == null){
@@ -139,7 +159,9 @@ public class MatchAPIController extends BaseAPIController{
 		renderJson(response);
 	}
 	
-	
+	/**
+	 * 导游者确认
+	 */
 	public void guider(){
 		String method = getRequest().getMethod();
 		if ("post".equalsIgnoreCase(method)) { 
@@ -159,7 +181,7 @@ public class MatchAPIController extends BaseAPIController{
     		return;
     	}
 		//从Match表查出用户id=userid and 导游id = guiderid的记录 状态置为2 
-		String sql = "SELECT * FROM `match` where userId=? and guiderId=? and flag=1 AND travelId NOT IN(SELECT travelId FROM travel)";
+		String sql = "SELECT * FROM `match` where userId=? and guiderId=? AND travelId NOT IN(SELECT travelId FROM travel)";
 		Match match = Match.dao.findFirst(sql,userId,guiderId);
 		
 		if(match == null){
@@ -169,8 +191,6 @@ public class MatchAPIController extends BaseAPIController{
 		
 		if(result.equals("0")){
 			match.setCurrent(Match.CODE_FAIL_GUIDER_REFUSE);
-			//将记录置为不可用状态(作为用户获取消息列表时的查询条件)
-			match.setFlag(false);
 		}else if(result.equals("1")){
 			match.setCurrent(Match.CODE_GUIDER_ACCEPT);
 		}else{
@@ -178,6 +198,9 @@ public class MatchAPIController extends BaseAPIController{
 			return;
 		}
 		match.update();
+		//将本次匹配的出游Id添加至user表
+		getUser().set("travelIdGuider", match.getTravelId());
+		
 		//将结果推送至出游者用户
 		/**
 		 * 集成友盟推送,暂用返回json
@@ -194,7 +217,9 @@ public class MatchAPIController extends BaseAPIController{
 	    renderJson(response);
 	}
 	
-	
+	/**
+	 * 出游者发出请求
+	 */
 	public void start(){
 		String method = getRequest().getMethod();
 		if ("post".equalsIgnoreCase(method)) { 
@@ -242,7 +267,8 @@ public class MatchAPIController extends BaseAPIController{
 					.set("userId", userId)
 					.set("guiderId", lo.get(i).getUserId())
 					.set("schoolId", schoolId)
-					.set("flag", 1)
+					.set("flagUser", true)
+					.set("flagGuider", true)
 					.set("current", "1")
 					.set("time", time)
 					.set("remark", remark)
@@ -252,6 +278,9 @@ public class MatchAPIController extends BaseAPIController{
 		
 		//将发送请求的出游者匹配状态置为不能匹配
 		getUser().set("flag",false).update();
+		//将本次匹配的出游Id添加至user表
+		getUser().set("travelIdUser", travelId).update();
+		//清除当前出游者的聊天列表
 		
 		//推送消息
 			/**

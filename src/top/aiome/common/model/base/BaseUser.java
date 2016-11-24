@@ -137,4 +137,20 @@ public abstract class BaseUser<M extends BaseUser<M>> extends Model<M> implement
 		return get("stars");
 	}
 
+	public void setTravelIdUser(java.lang.String travelIdUser) {
+		set("travelIdUser", travelIdUser);
+	}
+
+	public java.lang.String getTravelIdUser() {
+		return get("travelIdUser");
+	}
+
+	public void setTravelIdGuider(java.lang.String travelIdGuider) {
+		set("travelIdGuider", travelIdGuider);
+	}
+
+	public java.lang.String getTravelIdGuider() {
+		return get("travelIdGuider");
+	}
+
 }

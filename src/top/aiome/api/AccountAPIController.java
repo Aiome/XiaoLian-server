@@ -310,9 +310,5 @@ public class AccountAPIController extends BaseAPIController {
     	getUser().set(User.AVATAR, avatar).update();
     	renderSuccess("success");
     }
-    
-    public void temp(){
-    	renderText(User.getAge("dcc2d7bf7f2a4c089f142a35af2f1318")+"");
-    }
 }
 

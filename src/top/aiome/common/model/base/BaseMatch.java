@@ -33,12 +33,20 @@ public abstract class BaseMatch<M extends BaseMatch<M>> extends Model<M> impleme
 		return get("userId");
 	}
 
-	public void setFlag(java.lang.Boolean flag) {
-		set("flag", flag);
+	public void setFlagUser(java.lang.Boolean flagUser) {
+		set("flagUser", flagUser);
 	}
 
-	public java.lang.Boolean getFlag() {
-		return get("flag");
+	public java.lang.Boolean getFlagUser() {
+		return get("flagUser");
+	}
+
+	public void setFlagGuider(java.lang.Boolean flagGuider) {
+		set("flagGuider", flagGuider);
+	}
+
+	public java.lang.Boolean getFlagGuider() {
+		return get("flagGuider");
 	}
 
 	public void setCurrent(java.lang.String current) {
