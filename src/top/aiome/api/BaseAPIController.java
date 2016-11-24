@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 基本的api
  * 基于jfinal controller做一些封装
- * @author malongbo
+ * @author Aiome
  */
 public class BaseAPIController extends Controller {
 

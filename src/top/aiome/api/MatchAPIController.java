@@ -5,30 +5,32 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import com.jfinal.aop.Before;
-import com.jfinal.plugin.activerecord.Db;
 
-import push.Demo;
 import top.aiome.common.Require;
+import top.aiome.common.bean.BaseResponse;
 import top.aiome.common.bean.Code;
 import top.aiome.common.bean.DatumResponse;
 import top.aiome.common.model.Match;
 import top.aiome.common.model.Travel;
 import top.aiome.common.model.User;
-import top.aiome.common.token.TokenManager;
 import top.aiome.common.utils.RandomUtils;
-import top.aiome.common.utils.StringUtils;
 import top.aiome.interceptor.TokenInterceptor;
-
+/**
+ * 删除导游:		DELETE api/match/userDelGuider
+ * 删除出游:		DELETE api/match/guiderDelUser
+ * 获取导游聊天列表:	GET    api/match/guiderChatList
+ * 获取出游者聊天列表:GET    api/match/userChatList
+ * 出游者确认:		POST   api/match/matchEnd
+ * 导游选择: 		POST   api/match/guider
+ * 发出匹配请求:	POST   api/match/start
+ * @author Aiome
+ *
+ */
 @Before(TokenInterceptor.class)
 public class MatchAPIController extends BaseAPIController{
-	//发出请求
-	//导游确认
-	//出游者确认
-	//获取出游聊天列表
-	//获取导游聊天列表	
-	//从聊天列表删除联系人
 	
 	/**
+	 * 匹配流程:
 	 * 1.客户端提交出游用户数据(userId,条件，token)   start() post
 	 * 		条件:性别、学校、专业、入学年份、星座、年龄段
 	 * 2.服务端筛选出符合条件的用户
@@ -44,17 +46,98 @@ public class MatchAPIController extends BaseAPIController{
 	 * 		条件：导游id，确认结果
 	 * 		将匹配数据从匹配表删除
 	 */
+	/**
+	 * 从出游聊天列表删除导游
+	 */
+	public void userDelGuider(){
+		String method = getRequest().getMethod();
+		if (!"delete".equalsIgnoreCase(method)) { 
+            render404();
+		}
+		User user = getUser();
+		String guiderId = getPara("guiderId");
+		String userId = user.getUserId();
+		String travelId = user.getTravelIdUser();
+		
+		if(!notNull(Require.me()
+    			.put(guiderId, "guiderId can not be null")
+    			.put(travelId, "user has not yet issued a request"))){
+    		return;
+    	}
+		
+		String sql = "SELECT * FROM `match` where userId=? and guiderId=? and travelId=?";
+		Match match = Match.dao.findFirst(sql,userId,guiderId,travelId);
+		if(match == null){
+			renderFailed("not found matching records");
+			return;
+		}
+		
+		match.set("flagGuider", false).update();
+		
+		BaseResponse response = new BaseResponse();
+		response.setCode(Code.SUCCESS);
+		response.setMessage("success");
+		
+		renderJson(response);
+	
+	}
+	/**
+	 * 从导游聊天列表删除出游者
+	 */
+	public void guiderDelUser(){
+		String method = getRequest().getMethod();
+		if (!"delete".equalsIgnoreCase(method)) { 
+            render404();
+		}
+		//获取要删除的联系人userId
+		//将 userid = userId guider = current guider置为false
+		User guider = getUser();
+		String userId = getPara("userId");
+		String guiderId = guider.getUserId();
+		String travelId = guider.getTravelIdGuider();
+		if(!notNull(Require.me()
+    			.put(userId, "userId can not be null")
+    			.put(travelId, "user has not served as a guider"))){
+    		return;
+    	}
+		String sql = "SELECT * FROM `match` where userId=? and guiderId=? and travelId=?";
+		Match match = Match.dao.findFirst(sql,userId,guiderId,travelId);
+		if(match == null){
+			renderFailed("not found matching records");
+			return;
+		}
+		match.set("flagUser", false).update();
+		
+		BaseResponse response = new BaseResponse();
+		response.setCode(Code.SUCCESS);
+		response.setMessage("success");
+		
+		renderJson(response);
+	}
+	/**
+	 * 获取导游聊天列表
+	 */
 	public void guiderChatList(){
 		User guider = getUser();
 		String guiderId = guider.getUserId();
-		String travelIdGuider = guider.getTravelIdGuider();
+		String travelId = guider.getTravelIdGuider();
 		//若用户还未担任过导游，则没有聊天列表
 		if(!notNull(Require.me()
-    			.put(travelIdGuider, "user has not served as a guide"))){
+    			.put(travelId, "user has not served as a guider"))){
     		return;
     	}
-		String sql = "SELECT * FROM `match` where userId=? and travelIdGuider=? and flagUser=1";
-		List<Match> lm = Match.dao.find(sql,guiderId,travelIdGuider);
+		System.out.println("guiderid:"+guiderId);
+		System.out.println("gtaverid" + travelId);
+		String sql = "SELECT * FROM `match` where guiderId=? and travelId=? and flagUser=1";
+		List<Match> lm = Match.dao.find(sql,guiderId,travelId);
+		
+		DatumResponse response = new DatumResponse();
+		if(lm.isEmpty()){
+        	response.setCode(Code.FAIL).setMessage("not found available chat list");
+        }else {
+        	response.setDatum(lm);
+        }
+        renderJson(response);
 	}
 	/**
 	 * 获取出游者聊天列表
@@ -63,14 +146,14 @@ public class MatchAPIController extends BaseAPIController{
 		
 		User user = getUser();
 		String userId = user.getUserId();
-		String travelIdUser = user.getTravelIdUser();
+		String travelId = user.getTravelIdUser();
 		//若用户还未发出过请求，则没有聊天列表
 		if(!notNull(Require.me()
-    			.put(travelIdUser, "user has not yet issued a request"))){
+    			.put(travelId, "user has not yet issued a request"))){
     		return;
     	}
-		String sql = "SELECT * FROM `match` where userId=? and travelIdUser=? and flagGuider=1";
-		List<Match> lm = Match.dao.find(sql,userId,travelIdUser);
+		String sql = "SELECT * FROM `match` where userId=? and travelId=? and flagGuider=1";
+		List<Match> lm = Match.dao.find(sql,userId,travelId);
 		
 		DatumResponse response = new DatumResponse();
 		if(lm.isEmpty()){
@@ -86,7 +169,7 @@ public class MatchAPIController extends BaseAPIController{
 	 */
 	public void matchEnd(){
 		String method = getRequest().getMethod();
-		if ("post".equalsIgnoreCase(method)) { 
+		if (!"post".equalsIgnoreCase(method)) { 
             render404();
 		}
 		String guiderId = getPara("guiderId");
@@ -164,7 +247,7 @@ public class MatchAPIController extends BaseAPIController{
 	 */
 	public void guider(){
 		String method = getRequest().getMethod();
-		if ("post".equalsIgnoreCase(method)) { 
+		if (!"post".equalsIgnoreCase(method)) { 
             render404();
 		}
 		String userId = getPara("userId");
@@ -222,7 +305,7 @@ public class MatchAPIController extends BaseAPIController{
 	 */
 	public void start(){
 		String method = getRequest().getMethod();
-		if ("post".equalsIgnoreCase(method)) { 
+		if (!"post".equalsIgnoreCase(method)) { 
             render404();
 		}
 		

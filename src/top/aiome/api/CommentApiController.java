@@ -1,12 +1,6 @@
 package top.aiome.api;
 
-import static top.aiome.common.model.User.PASSWORD;
-
-import java.util.HashMap;
 import java.util.List;
-
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Clear;
 
 import top.aiome.common.Require;
 import top.aiome.common.bean.Code;
