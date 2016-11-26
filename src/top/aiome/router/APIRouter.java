@@ -18,8 +18,10 @@ public class APIRouter extends Routes {
         //匹配相关
         add("/api/match",MatchAPIController.class);
         //评论相关
-        add("/api/comment",CommentApiController.class);
+        add("/api/comment",CommentAPIController.class);
         //出游相关
         add("/api/travel",TravelAPIController.class);
+        //学校相关
+        add("/api/college",CollegeAPIController.class);
     }
 }

@@ -16,7 +16,7 @@ import top.aiome.common.utils.RandomUtils;
 import top.aiome.interceptor.TokenInterceptor;
 
 @Before(TokenInterceptor.class)
-public class CommentApiController extends BaseAPIController{
+public class CommentAPIController extends BaseAPIController{
 	@Clear
 	public void getUserComment(){
 		String userId = getPara("userId");
