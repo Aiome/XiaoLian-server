@@ -17,7 +17,29 @@ import top.aiome.common.bean.DatumResponse;
 import top.aiome.common.model.College;
 
 public class CollegeAPIController extends BaseAPIController{
-	public void college(){
+	/**
+	 * 查询所选学校经纬度
+	 */
+	public void searchLaAndLo(){
+		String collegeName = getPara("collegeName");
+		
+		if(!notNull(Require.me()
+    			.put(collegeName, "collegeName can not be null"))){
+    		return;
+    	}	
+		List<College> lc = College.dao.find("select lantitude,longitude  from `college` where `name`=?",collegeName);
+		DatumResponse response = new DatumResponse();
+        
+        if (lc.isEmpty()) {
+            response.setCode(Code.FAIL).setMessage("not found");
+        } else {
+            response.setDatum(lc);
+        }
+
+        renderJson(response);
+	}
+	
+	public void searchCollege(){
 		String keyWord = getPara("keyWord");
 		
 		if(!notNull(Require.me()
@@ -34,7 +56,7 @@ public class CollegeAPIController extends BaseAPIController{
 		sb.append('%');
 		keyWord = sb.toString();
 			
-		List<College> lc = College.dao.find("select name,coid from `college` where `name` like '"+ keyWord + "' ORDER BY binary CONVERT(`name` USING GBK) ASC");
+		List<College> lc = College.dao.find("select * from `college` where `name` like '"+ keyWord + "' ORDER BY binary CONVERT(`name` USING GBK) ASC");
 		DatumResponse response = new DatumResponse();
         
         if (lc.isEmpty()) {
