@@ -1,4 +1,4 @@
-/** 
+﻿/** 
 * 文件名称:.java
 * 姓		名:马红岩
 * 学		号:2014011791
@@ -15,8 +15,30 @@ import top.aiome.common.Require;
 import top.aiome.common.bean.Code;
 import top.aiome.common.bean.DatumResponse;
 import top.aiome.common.model.College;
+import top.aiome.common.model.Major;
 
 public class CollegeAPIController extends BaseAPIController{
+/**
+	 * 根据学校ID查询所选学校的专业
+	 */
+	public void searchMajor(){
+		String collegeId = getPara("collegeId");
+		
+		if(!notNull(Require.me()
+    			.put(collegeId, "collegeId can not be null"))){
+    		return;
+    	}	
+		List<Major> lm = Major.dao.find("select *  from `major` where `collegeID`=?",collegeId);
+		DatumResponse response = new DatumResponse();
+        
+        if (lm.isEmpty()) {
+            response.setCode(Code.FAIL).setMessage("not found");
+        } else {
+            response.setDatum(lm);
+        }
+
+        renderJson(response);
+	}
 	/**
 	 * 查询所选学校经纬度
 	 */
