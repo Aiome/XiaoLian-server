@@ -10,6 +10,7 @@ import top.aiome.common.Require;
 import top.aiome.common.bean.BaseResponse;
 import top.aiome.common.bean.Code;
 import top.aiome.common.bean.DatumResponse;
+import top.aiome.common.model.Major;
 import top.aiome.common.model.Match;
 import top.aiome.common.model.Travel;
 import top.aiome.common.model.User;
@@ -316,31 +317,57 @@ public class MatchAPIController extends BaseAPIController{
 		}
 		
 		//获取筛选条件
-		int sex = getParaToInt("sex");
+		int sex = getParaToInt("sex",5);
 		String schoolId = getPara("schoolId");
 		String majorId = getPara("majorId");
+		
 		String enrollment = getPara("enrollment");
 		String constellation = getPara("constellation");
 		String birthdayMin = getPara("birthdayMin");
 		String birthdayMax = getPara("birthdayMax");
 		String remark = getPara("remark");
 		String time = getPara("time");
-		
+
+		StringBuffer sb = new StringBuffer("select * from user where schoolId=" + schoolId + " and userId!='" + getUser().getUserId() + "'");
+		if(sex != 5){
+			sb.append(" and sex=" + sex);
+		}
+		if(majorId != null){
+			sb.append(" and majorId=" + majorId);
+		}
+		if(enrollment != null){
+			sb.append(" and enrollment=" + enrollment);
+		}
+		if(constellation != null){
+			sb.append(" and constellation='" + constellation + "'");
+		}
+		if((birthdayMin != null) && (birthdayMax != null)){
+			sb.append(" and birthday>'" + birthdayMin + "'" + " and birthday<'" + birthdayMax + "'");
+		}
+
 		if(!notNull(Require.me()
-    			.put(sex, "sex password can not be null")
     			.put(schoolId, "schoolId can not be null")
-    			.put(majorId, "majorId can not be null")
-    			.put(enrollment, "enrollment can not be null")
-    			.put(constellation, "constellation can not be null")
-    			.put(birthdayMin, "min birthday can not be null")
-    			.put(birthdayMax, "max birthday can not be null")
     			.put(time, "time can not be null"))){
     		return;
     	}
 		//筛选出符合条件的用户
-		String sql = "select * from user where sex=? and schoolId=? and majorId=? and enrollment=? and constellation=? and birthday>? and birthday<? and userId!=?";
-		List<User> lo = User.user.find(sql,sex,schoolId,majorId,enrollment,constellation,birthdayMin,birthdayMax,getUser().getUserId());
-		
+//		String sql = "select * from user where sex=? and schoolId=? and majorId=? and enrollment=? and constellation=? and birthday>? and birthday<? and userId!=?";
+		String sql = sb.toString();
+		System.out.println(sql);
+		List<User> lo = User.user.find(sql);
+		//推送消息
+		/**
+		 * 集成友盟推送,暂用返回json
+		 */
+	
+		DatumResponse response = new DatumResponse();
+		if(lo.isEmpty()){
+        	response.setCode(Code.FAIL).setMessage("no guider");
+        	renderJson(response);
+        	return;
+        }else {
+        	response.setDatum(lo);
+        }
 		//保存数据
 		String userId = getUser().userId();
 		String travelId = RandomUtils.randomCustomUUID();
@@ -358,23 +385,14 @@ public class MatchAPIController extends BaseAPIController{
 					.set("travelId", travelId)
 					.save();
 		}
-		
+			
 		//将发送请求的出游者匹配状态置为不能匹配
 		getUser().set("flag",false).update();
 		//将本次匹配的出游Id添加至user表
 		getUser().set("travelIdUser", travelId).update();
 		//清除当前出游者的聊天列表
 		
-		//推送消息
-			/**
-			 * 集成友盟推送,暂用返回json
-			 */
-		DatumResponse response = new DatumResponse();
-		if(lo.isEmpty()){
-        	response.setCode(Code.FAIL).setMessage("no guider");
-        }else {
-        	response.setDatum(lo);
-        }
+		
         renderJson(response);	
 	}
 	

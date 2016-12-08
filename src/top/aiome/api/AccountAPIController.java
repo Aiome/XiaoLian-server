@@ -50,7 +50,7 @@ public class AccountAPIController extends BaseAPIController {
             return;
         }
         //检查手机号码是否被注册
-        boolean exists = Db.findFirst("SELECT * FROM user WHERE loginName=?", loginName) != null;
+        boolean exists = Db.findFirst("SELECT * FROM user WHERE mobile=?", loginName) != null;
         renderJson(new BaseResponse(exists ? Code.SUCCESS:Code.FAIL, exists ? "registered" : "unregistered"));
     }
     
