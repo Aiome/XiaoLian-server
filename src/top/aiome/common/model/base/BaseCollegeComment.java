@@ -33,11 +33,11 @@ public abstract class BaseCollegeComment<M extends BaseCollegeComment<M>> extend
 		return get("comment");
 	}
 
-	public void setScore(java.lang.String score) {
+	public void setScore(java.lang.Integer score) {
 		set("score", score);
 	}
 
-	public java.lang.String getScore() {
+	public java.lang.Integer getScore() {
 		return get("score");
 	}
 

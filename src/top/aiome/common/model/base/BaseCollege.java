@@ -33,4 +33,20 @@ public abstract class BaseCollege<M extends BaseCollege<M>> extends Model<M> imp
 		return get("provinceID");
 	}
 
+	public void setLantitude(java.lang.Double lantitude) {
+		set("lantitude", lantitude);
+	}
+
+	public java.lang.Double getLantitude() {
+		return get("lantitude");
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		set("longitude", longitude);
+	}
+
+	public java.lang.Double getLongitude() {
+		return get("longitude");
+	}
+
 }
