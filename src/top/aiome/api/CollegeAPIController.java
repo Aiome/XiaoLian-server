@@ -1,4 +1,4 @@
-﻿/** 
+/** 
 * 文件名称:.java
 * 姓		名:马红岩
 * 学		号:2014011791
@@ -18,7 +18,7 @@ import top.aiome.common.model.College;
 import top.aiome.common.model.Major;
 
 public class CollegeAPIController extends BaseAPIController{
-/**
+	/**
 	 * 根据学校ID查询所选学校的专业
 	 */
 	public void searchMajor(){
@@ -39,8 +39,9 @@ public class CollegeAPIController extends BaseAPIController{
 
         renderJson(response);
 	}
+	
 	/**
-	 * 查询所选学校经纬度
+	 * 根据学校名称查询所选学校经纬度和ID
 	 */
 	public void searchLaAndLo(){
 		String collegeName = getPara("collegeName");
@@ -49,7 +50,7 @@ public class CollegeAPIController extends BaseAPIController{
     			.put(collegeName, "collegeName can not be null"))){
     		return;
     	}	
-		List<College> lc = College.dao.find("select lantitude,longitude  from `college` where `name`=?",collegeName);
+		List<College> lc = College.dao.find("select coid,lantitude,longitude  from `college` where `name`=?",collegeName);
 		DatumResponse response = new DatumResponse();
         
         if (lc.isEmpty()) {
@@ -61,6 +62,9 @@ public class CollegeAPIController extends BaseAPIController{
         renderJson(response);
 	}
 	
+	/**
+	 * 根据关键字搜索大学
+	 */
 	public void searchCollege(){
 		String keyWord = getPara("keyWord");
 		
