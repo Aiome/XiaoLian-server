@@ -19,6 +19,7 @@ import top.aiome.interceptor.TokenInterceptor;
 import static top.aiome.common.model.User.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -203,7 +204,31 @@ public class AccountAPIController extends BaseAPIController {
         }
     }
 
+    /**
+     * 查询用户当前状态
+     */
+    public void getStatus(){
+    	User user = getUser();
+		String userId = user.getUserId();
+		
+		if(!notNull(Require.me()
+				.put(userId, "userId can not be null"))){		
+			return;
+		}
+		
+		List<User> lu = User.user.find("select flag from `user` where userId=?",userId);
+		
+		DatumResponse response = new DatumResponse();
+        
+        if (lu.isEmpty()) {
+            response.setCode(Code.FAIL).setMessage("no flag");
+        } else {
+            response.setDatum(lu);
+        }
 
+        renderJson(response);
+    }
+    
     /**
      * 查询用户资料
      */

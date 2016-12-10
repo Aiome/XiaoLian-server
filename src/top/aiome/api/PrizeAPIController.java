@@ -127,3 +127,4 @@ public class PrizeAPIController extends BaseAPIController {
         renderJson(response);
 	}
 }
+

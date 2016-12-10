@@ -23,6 +23,8 @@ public class APIRouter extends Routes {
         add("/api/travel",TravelAPIController.class);
         //学校相关
         add("/api/college",CollegeAPIController.class);
+        //奖品相关
+        add("/api/prize",CollegeAPIController.class);
         
         add("/api/temp",temp.class);
     }
