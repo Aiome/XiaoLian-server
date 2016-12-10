@@ -44,6 +44,7 @@ public class Code {
      * 验证码错误
      */
     public static final int CODE_ERROR = 4;
+    
     /**
      * 不能开始旅行
      */
