@@ -113,11 +113,11 @@ public abstract class BaseUser<M extends BaseUser<M>> extends Model<M> implement
 		return get("constellation");
 	}
 
-	public void setFlag(java.lang.Boolean flag) {
+	public void setFlag(java.lang.Integer flag) {
 		set("flag", flag);
 	}
 
-	public java.lang.Boolean getFlag() {
+	public java.lang.Integer getFlag() {
 		return get("flag");
 	}
 

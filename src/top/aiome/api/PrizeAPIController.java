@@ -73,6 +73,25 @@ public class PrizeAPIController extends BaseAPIController {
 		
 		prize.setPrizeCount(newCount);
 		prize.update();
+		/*prize.setPrizeCount(prizeCount);
+		//从Match表查出用户id=userid and 导游id = guiderid的记录 状态置为2 
+				String sql = "SELECT * FROM `match` where userId=? and guiderId=? AND travelId NOT IN(SELECT travelId FROM travel)";
+				Match match = Match.dao.findFirst(sql,userId,guiderId);
+				
+				if(match == null){
+					renderFailed("not found matching records");
+					return;
+				}
+				
+				if(result.equals("0")){
+					match.setCurrent(Match.CODE_FAIL_GUIDER_REFUSE);
+				}else if(result.equals("1")){
+					match.setCurrent(Match.CODE_GUIDER_ACCEPT);
+				}else{
+					renderArgumentError("result is not valid");
+					return;
+				}
+				match.update();*/
 
 		// 在已分配奖品表中增加记录
 		String allocatePrizeId = RandomUtils.randomCustomUUID();
@@ -108,3 +127,4 @@ public class PrizeAPIController extends BaseAPIController {
         renderJson(response);
 	}
 }
+

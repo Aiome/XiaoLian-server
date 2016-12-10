@@ -23,7 +23,15 @@ import top.aiome.interceptor.TokenInterceptor;
  * 获取出游者聊天列表:GET    api/match/userChatList
  * 出游者确认:		POST   api/match/matchEnd
  * 导游选择: 		POST   api/match/guider
- * 发出匹配请求:	POST   api/match/start
+ * 开始匹配:	POST   api/match/start
+ * 开始旅程	flag 4->5
+ * 旅程结束      
+ * 获取当前用户类型     
+ * flag
+ * 1->未出游    	 (可发送邀请)  		旅程结束/注册        	4->1
+ * 2->匹配中         (显示匹配中) 		 开始匹配 		1->2
+ * 3->匹配成功     (显示开始旅程) 	 出游者确认                2->3
+ * 4->出游中         (显示结束出游)   	开始旅程                     3->4
  * @author Aiome
  *
  */
@@ -46,6 +54,9 @@ public class MatchAPIController extends BaseAPIController{
 	 * 6.客户端(出游用户)提交最终选择结果  matchEnd()	post
 	 * 		条件：导游id，确认结果
 	 * 		将匹配数据从匹配表删除
+	 * 
+	 * 
+	 * 
 	 */
 	/**
 	 * 从出游聊天列表删除导游
@@ -166,6 +177,53 @@ public class MatchAPIController extends BaseAPIController{
         
 	}
 	/**
+	 * 结束旅程
+	 */
+	public void travelEnd(){
+		/**
+		 * 判断用户类型,只有出游者才能操作
+		 */
+		int flag = getUser().getFlag();
+		if(flag != 4){
+			renderJson(new BaseResponse(Code.TRAVEL_ERROR,"can not end travel!"));
+			return;
+		}
+		
+		
+		//将当前出游记录置为出游结束
+		String travelId = getUser().getTravelIdUser();
+		String sql = "select * from travel where travelId=?";
+		Travel travel = Travel.dao.findFirst(sql,travelId);
+		
+		if(travel == null){
+			renderFailed("not found matching records");
+			return;
+		}
+		User user = User.user.findById(travel.getGuiderId());
+		user.set("flag", 1).update();
+		//将出游者状态置为未出游
+		getUser().set("flag", 1).update();
+		travel.set("flag",false);
+		travel.update();
+		renderJson(new BaseResponse(Code.SUCCESS,"success!"));
+	}
+	/**
+	 * 开始旅程
+	 */
+	public void travelStart(){
+		/**
+		 * 判断用户类型，只有出游者且匹配成功才能操作
+		 */
+		int flag = getUser().getFlag();
+		if(flag != 3){
+			renderJson(new BaseResponse(Code.TRAVEL_ERROR,"can not start travel!"));
+			return;
+		}
+		//将出游者状态置为出游中
+		getUser().set("flag", 4).update();
+		renderJson(new BaseResponse(Code.SUCCESS,"success!"));
+	}
+	/**
 	 * 出游者再次确认
 	 */
 	public void matchEnd(){
@@ -235,10 +293,8 @@ public class MatchAPIController extends BaseAPIController{
             map.remove("password");
             response.setDatum(map);
 	    }
-		//将出游者匹配状态置为 可匹配
-		getUser().set("flag", 1).update();
-		//匹配结束删除记录
-//		 Db.update("DELETE FROM `match` WHERE userId", getUser().getUserId());
+		//将出游者匹配状态置为出游中
+		getUser().set("flag", 3).update();
 		 
 		renderJson(response);
 	}
@@ -247,6 +303,12 @@ public class MatchAPIController extends BaseAPIController{
 	 * 导游者确认
 	 */
 	public void guider(){
+		/**
+		 * 
+		 * 添加判断当前匹配是否结束
+		 * 
+		 * 
+		 */
 		String method = getRequest().getMethod();
 		if (!"post".equalsIgnoreCase(method)) { 
             render404();
@@ -283,7 +345,7 @@ public class MatchAPIController extends BaseAPIController{
 		}
 		match.update();
 		//将本次匹配的出游Id添加至user表
-		getUser().set("travelIdGuider", match.getTravelId());
+		getUser().set("travelIdGuider", match.getTravelId()).update();
 		
 		//将结果推送至出游者用户
 		/**
@@ -309,12 +371,13 @@ public class MatchAPIController extends BaseAPIController{
 		if (!"post".equalsIgnoreCase(method)) { 
             render404();
 		}
-		
+		System.out.println(getUser().getFlag());
 		//判断能否进行请求
-		if(getUser().getFlag() == false){
+		if((getUser().getFlag() != 1)){
 			renderFailed("user can't match");
 			return;
 		}
+		
 		
 		//获取筛选条件
 		int sex = getParaToInt("sex",5);
@@ -386,8 +449,8 @@ public class MatchAPIController extends BaseAPIController{
 					.save();
 		}
 			
-		//将发送请求的出游者匹配状态置为不能匹配
-		getUser().set("flag",false).update();
+		//将发送请求的出游者匹配状态置为匹配中
+		getUser().set("flag",2).update();
 		//将本次匹配的出游Id添加至user表
 		getUser().set("travelIdUser", travelId).update();
 		//清除当前出游者的聊天列表
