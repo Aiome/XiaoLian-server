@@ -44,6 +44,7 @@ public class Code {
      * 验证码错误
      */
     public static final int CODE_ERROR = 4;
+    
     /**
      * 没有符合条件的导游
      */

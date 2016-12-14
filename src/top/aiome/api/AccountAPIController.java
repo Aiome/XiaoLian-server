@@ -247,6 +247,8 @@ public class AccountAPIController extends BaseAPIController {
             response.setCode(Code.FAIL).setMessage("user is not found");
         } else {
             HashMap<String, Object> map = new HashMap<String, Object>(resultUser.getAttrs());
+            map.put("schoolName", resultUser.getSchoolName(resultUser.getAttrs().get("schoolId").toString()));
+            map.put("majorName", resultUser.getMajorName(resultUser.getAttrs().get("majorId").toString()));
             map.remove(PASSWORD);
             response.setDatum(map);
         }
