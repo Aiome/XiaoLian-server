@@ -45,7 +45,35 @@ public class Code {
      */
     public static final int CODE_ERROR = 4;
     /**
+     * 没有符合条件的导游
+     */
+    public static final int NO_GUIDER = 5;
+    /**
      * 不能开始旅行
      */
-    public static final int TRAVEL_ERROR = 10;
+    public static final int TRAVEL_ERROR = 6;
+    /**
+     * 未查询到符合条件的匹配记录
+     */
+    public static final int NO_RECORED = 7;
+    /**
+     * 不能开始匹配
+     */
+    public static final int MATCH_ERROR = 8;
+    /**
+     * 该用户没有出游记录
+     */
+    public static final int NO_TRAVEL_RECORED = 9;
+    /**
+     * 该用户没有导游记录
+     */
+    public static final int NO_GUIDE_RECORED = 10;
+    /**
+     * 不显示remark
+     */
+    public static final int NO_REMARK = 11;
+    /**
+     * 显示remark
+     */
+    public static final int SHOW_REMARK = 12;
 }

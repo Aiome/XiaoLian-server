@@ -4,7 +4,16 @@ package top.aiome.api;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.easemob.server.example.api.SendMessageAPI;
+import com.easemob.server.example.comm.ClientContext;
+import com.easemob.server.example.comm.EasemobRestAPIFactory;
+import com.easemob.server.example.comm.body.CommandMessageBody;
+import com.easemob.server.example.comm.body.TextMessageBody;
+import com.easemob.server.example.comm.constant.MsgTargetType;
 import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.Db;
 
 import top.aiome.common.Require;
 import top.aiome.common.bean.BaseResponse;
@@ -58,6 +67,94 @@ public class MatchAPIController extends BaseAPIController{
 	 * 
 	 * 
 	 */
+	public void guiderGetRemark(){
+		/**
+		 * 导游显示remark条件
+		 * 1.收到了请求
+		 * 2.还没有接受
+		 * 3.出游表没有记录
+		 */	
+		String userId = getPara("userId");
+		User user = getUser();
+		String guiderId = user.getUserId();
+		user = User.user.findById(guiderId);
+		String travelId = user.getTravelIdGuider();
+		
+		if(!notNull(Require.me()
+    			.put(userId, "userId can not be null")
+    			.put(travelId, "user has not yet issued a request"))){
+    		return;
+    	}
+		
+		String sql = "SELECT time,remark FROM `match` where userId=? and guiderId=? and travelId=? and current=1";
+		String sqlt = "select * from travel where travelId=?";
+		Match match = Match.dao.findFirst(sql,userId,guiderId,travelId);
+		Travel travel = Travel.dao.findFirst(sqlt,travelId);
+		DatumResponse datum = new DatumResponse();
+		if(match == null){
+			datum.setCode(Code.NO_REMARK);
+			datum.setDatum(match);
+			datum.setMessage("hide remark");
+			renderJson(datum);
+			return;
+		}
+		if(travel != null){
+			datum.setCode(Code.NO_REMARK);
+			datum.setDatum(match);
+			datum.setMessage("hide remark");
+			renderJson(datum);
+			return;
+		}else{
+			datum.setCode(Code.SHOW_REMARK);
+			datum.setDatum(match);
+			datum.setMessage("show remark");
+			renderJson(datum);
+		}
+	}
+	public void userGetRemark(){
+		/**
+		 * 出游者显示remark条件
+		 * 	1.出游者发出了请求
+		 *  2.导游接受了
+		 *  3.出游表没有记录
+		 */
+		String guiderId = getPara("guiderId");
+		User user = getUser();
+		String userId = user.getUserId();
+		user = User.user.findById(userId);
+		String travelId = user.getTravelIdUser();
+		
+		if(!notNull(Require.me()
+    			.put(guiderId, "guiderId can not be null")
+    			.put(travelId, "user has not yet issued a request"))){
+    		return;
+    	}
+		
+		String sql = "SELECT time,remark FROM `match` where userId=? and guiderId=? and travelId=? and current=2";
+		String sqlt = "select * from travel where travelId=?";
+		Match match = Match.dao.findFirst(sql,userId,guiderId,travelId);
+		Travel travel = Travel.dao.findFirst(sqlt,travelId);
+		DatumResponse datum = new DatumResponse();
+		if(match == null){
+			datum.setCode(Code.NO_REMARK);
+			datum.setDatum(match);
+			datum.setMessage("hide remark");
+			renderJson(datum);
+			return;
+		}
+		if(travel != null){
+			datum.setCode(Code.NO_REMARK);
+			datum.setDatum(match);
+			datum.setMessage("hide remark");
+			renderJson(datum);
+			return;
+		}else{
+			datum.setCode(Code.SHOW_REMARK);
+			datum.setDatum(match);
+			datum.setMessage("show remark");
+			renderJson(datum);
+		}		
+	}
 	/**
 	 * 从出游聊天列表删除导游
 	 */
@@ -147,7 +244,17 @@ public class MatchAPIController extends BaseAPIController{
 		if(lm.isEmpty()){
         	response.setCode(Code.FAIL).setMessage("not found available chat list");
         }else {
-        	response.setDatum(lm);
+        	EasemobRestAPIFactory factory = ClientContext.getInstance().init(ClientContext.INIT_FROM_PROPERTIES).getAPIFactory();
+        	SendMessageAPI message = (SendMessageAPI)factory.newInstance(EasemobRestAPIFactory.SEND_MESSAGE_CLASS);  	
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("guider", "1");
+        	String to = guiderId;
+        	String from = "";
+        	for(int i = 0; i < lm.size(); i++){
+        		from = User.user.findById(lm.get(i).getUserId()).getUserName();
+        		message.sendMessage(new TextMessageBody(MsgTargetType.USERS, new String[]{"test1"}, "导游", map, "我接受了邀请!"));
+        	}
+        	response.setCode(Code.SUCCESS).setMessage("success");
         }
         renderJson(response);
 	}
@@ -160,8 +267,8 @@ public class MatchAPIController extends BaseAPIController{
 		String userId = user.getUserId();
 		String travelId = user.getTravelIdUser();
 		//若用户还未发出过请求，则没有聊天列表
-		if(!notNull(Require.me()
-    			.put(travelId, "user has not yet issued a request"))){
+		if(travelId.isEmpty()){
+			renderJson(new BaseResponse(Code.NO_TRAVEL_RECORED,"user has not yet issued a request!"));
     		return;
     	}
 		String sql = "SELECT * FROM `match` where userId=? and travelId=? and flagGuider=1";
@@ -171,7 +278,16 @@ public class MatchAPIController extends BaseAPIController{
 		if(lm.isEmpty()){
         	response.setCode(Code.FAIL).setMessage("not found available chat list");
         }else {
-        	response.setDatum(lm);
+        	EasemobRestAPIFactory factory = ClientContext.getInstance().init(ClientContext.INIT_FROM_PROPERTIES).getAPIFactory();
+        	SendMessageAPI message = (SendMessageAPI)factory.newInstance(EasemobRestAPIFactory.SEND_MESSAGE_CLASS);
+        	String to = userId;
+        	String from = "";
+        	for(int i = 0; i < lm.size(); i++){
+        		from = User.user.findById(lm.get(i).getGuiderId()).getUserName();
+        		message.sendMessage(new CommandMessageBody(MsgTargetType.USERS, new String[]{"test1"}, from, null, "show"));
+        	}
+        	
+        	response.setCode(Code.SUCCESS).setMessage("success");
         }
         renderJson(response);		
         
@@ -330,8 +446,9 @@ public class MatchAPIController extends BaseAPIController{
 		String sql = "SELECT * FROM `match` where userId=? and guiderId=? AND travelId NOT IN(SELECT travelId FROM travel)";
 		Match match = Match.dao.findFirst(sql,userId,guiderId);
 		
+		
 		if(match == null){
-			renderFailed("not found matching records");
+			renderJson(new BaseResponse(Code.NO_RECORED,"not found matching records!"));
 			return;
 		}
 		
@@ -374,7 +491,7 @@ public class MatchAPIController extends BaseAPIController{
 		System.out.println(getUser().getFlag());
 		//判断能否进行请求
 		if((getUser().getFlag() != 1)){
-			renderFailed("user can't match");
+			renderJson(new BaseResponse(Code.MATCH_ERROR,"user can not match!"));
 			return;
 		}
 		
@@ -425,7 +542,7 @@ public class MatchAPIController extends BaseAPIController{
 	
 		DatumResponse response = new DatumResponse();
 		if(lo.isEmpty()){
-        	response.setCode(Code.FAIL).setMessage("no guider");
+        	response.setCode(Code.NO_GUIDER).setMessage("no guider");
         	renderJson(response);
         	return;
         }else {
