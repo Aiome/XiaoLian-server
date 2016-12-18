@@ -94,6 +94,7 @@ public class MatchAPIController extends BaseAPIController{
 		if(match == null){
 			datum.setCode(Code.NO_REMARK);
 			datum.setDatum(match);
+			System.out.println("1");
 			datum.setMessage("hide remark");
 			renderJson(datum);
 			return;
@@ -101,6 +102,7 @@ public class MatchAPIController extends BaseAPIController{
 		if(travel != null){
 			datum.setCode(Code.NO_REMARK);
 			datum.setDatum(match);
+			System.out.println("2");
 			datum.setMessage("hide remark");
 			renderJson(datum);
 			return;
@@ -251,8 +253,9 @@ public class MatchAPIController extends BaseAPIController{
         	String to = guiderId;
         	String from = "";
         	for(int i = 0; i < lm.size(); i++){
-        		from = User.user.findById(lm.get(i).getUserId()).getUserName();
-        		message.sendMessage(new TextMessageBody(MsgTargetType.USERS, new String[]{"test1"}, "导游", map, "我接受了邀请!"));
+//        		from = User.user.findById(lm.get(i).getUserId()).getUserName();
+        		from = lm.get(i).getUserId();
+        		message.sendMessage(new TextMessageBody(MsgTargetType.USERS, new String[]{to}, from, map, "我接受了邀请!"));
         	}
         	response.setCode(Code.SUCCESS).setMessage("success");
         }
@@ -283,8 +286,9 @@ public class MatchAPIController extends BaseAPIController{
         	String to = userId;
         	String from = "";
         	for(int i = 0; i < lm.size(); i++){
-        		from = User.user.findById(lm.get(i).getGuiderId()).getUserName();
-        		message.sendMessage(new CommandMessageBody(MsgTargetType.USERS, new String[]{"test1"}, from, null, "show"));
+//        		from = User.user.findById(lm.get(i).getGuiderId()).getUserName();
+        		from = lm.get(i).getGuiderId();
+        		message.sendMessage(new CommandMessageBody(MsgTargetType.USERS, new String[]{userId}, from, null, "show"));
         	}
         	
         	response.setCode(Code.SUCCESS).setMessage("success");

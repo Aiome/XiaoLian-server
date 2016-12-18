@@ -19,6 +19,27 @@ import top.aiome.common.model.Major;
 
 public class CollegeAPIController extends BaseAPIController{
 	/**
+	 * 根据学校id获取学校名称
+	 */
+	public void schoolName(){
+		String collegeId = getPara("collegeId");
+		
+		if(!notNull(Require.me()
+    			.put(collegeId, "collegeId can not be null"))){
+    		return;
+    	}	
+		College lm = College.dao.findFirst("select name from `college` where coid=?",collegeId);
+		DatumResponse response = new DatumResponse();
+        
+        if (lm == null) {
+            response.setCode(Code.FAIL).setMessage("not found");
+        } else {
+            response.setDatum(lm);
+        }
+
+        renderJson(response);
+	}
+	/**
 	 * 根据学校ID查询所选学校的专业
 	 */
 	public void searchMajor(){

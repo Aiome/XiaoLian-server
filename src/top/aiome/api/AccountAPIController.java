@@ -196,7 +196,7 @@ public class AccountAPIController extends BaseAPIController {
     public void profile() {
         String method = getRequest().getMethod();
         if ("get".equalsIgnoreCase(method)) { //查询资料
-            getProfile();
+        	updateProfile();
         } else if ("put".equalsIgnoreCase(method)) { //修改资料
             updateProfile();
         } else {
@@ -263,15 +263,15 @@ public class AccountAPIController extends BaseAPIController {
         boolean flag = false;
         BaseResponse response = new BaseResponse();
         User user = getUser();
-        String nickName = getPara("userName");
-        if (StringUtils.isNotEmpty(nickName)) {
-            user.set(USER_NAME, nickName);
+        String userName = getPara("userName");
+        if (StringUtils.isNotEmpty(userName)) {
+            user.set("userName", userName);
             flag = true;
         }
-        
-        String avatar = getPara("avatar");
-        if (StringUtils.isNotEmpty(avatar)) {
-            user.set(AVATAR, avatar);
+        //修改手机号
+        String mobile = getPara("mobile");
+        if (StringUtils.isNotEmpty(mobile)) {
+            user.set("mobile", mobile);
             flag = true;
         }
 
@@ -285,7 +285,47 @@ public class AccountAPIController extends BaseAPIController {
             user.set(SEX, sex);
             flag = true;
         }
-
+        
+        //修改头像      
+        String profileImage = getPara("profileImage");
+        if (StringUtils.isNotEmpty(profileImage)) {
+            user.set("profileImage", profileImage);
+            flag = true;
+        }
+        
+        //修改学校      
+        String schoolId = getPara("schoolId");
+        if (StringUtils.isNotEmpty(schoolId)) {
+            user.set("schoolId", schoolId);
+            flag = true;
+        }
+        
+        //修改专业
+        String majorId = getPara("majorId");
+        if (StringUtils.isNotEmpty(majorId)) {
+            user.set("majorId", majorId);
+            flag = true;
+        }
+        //修改入学年份     
+        String enrollment = getPara("enrollment");
+        if (StringUtils.isNotEmpty(enrollment)) {
+            user.set("enrollment", enrollment);
+            flag = true;
+        }
+        
+        //修改出生日期      
+        String birthday = getPara("birthday");
+        if (StringUtils.isNotEmpty(birthday)) {
+            user.set("birthday", birthday);
+            flag = true;
+        }
+        //修改星座
+        String constellation = getPara("constellation");
+        if (StringUtils.isNotEmpty(constellation)) {
+            user.set("constellation", constellation);
+            flag = true;
+        }
+        
         if (flag) {
             boolean update = user.update();
             renderJson(response.setCode(update ? Code.SUCCESS : Code.FAIL).setMessage(update ? "update success" : "update failed"));

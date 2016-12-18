@@ -26,6 +26,5 @@ public class APIRouter extends Routes {
         //奖品相关
         add("/api/prize",CollegeAPIController.class);
         
-        add("/api/temp",temp.class);
     }
 }
