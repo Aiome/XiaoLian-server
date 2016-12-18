@@ -5,6 +5,7 @@ import com.jfinal.aop.Clear;
 import com.jfinal.log.*;
 import com.jfinal.plugin.activerecord.Db;
 import top.aiome.common.bean.*;
+import top.aiome.common.model.College;
 import top.aiome.common.model.RegisterCode;
 import top.aiome.common.model.User;
 import top.aiome.common.utils.SMSUtils;
@@ -39,6 +40,27 @@ import java.util.Map;
 @Before(TokenInterceptor.class)
 public class AccountAPIController extends BaseAPIController {
 	private static Log log = Log.getLog(AccountAPIController.class);
+	
+	@Clear
+	public void getName(){
+		String collegeId = getPara("userId");
+		
+		if(!notNull(Require.me()
+    			.put(collegeId, "userId can not be null"))){
+    		return;
+    	}	
+		User lm = User.user.findFirst("select userName from `user` where userId=?",collegeId);
+		DatumResponse response = new DatumResponse();
+        
+        if (lm == null) {
+            response.setCode(Code.FAIL).setMessage("not found");
+        } else {
+            response.setDatum(lm);
+        }
+
+        renderJson(response);
+        
+	}
 
     /**
      * 检查用户账号是否被注册*

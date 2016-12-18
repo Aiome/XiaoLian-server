@@ -274,7 +274,7 @@ public class MatchAPIController extends BaseAPIController{
 			renderJson(new BaseResponse(Code.NO_TRAVEL_RECORED,"user has not yet issued a request!"));
     		return;
     	}
-		String sql = "SELECT * FROM `match` where userId=? and travelId=? and flagGuider=1";
+		String sql = "SELECT * FROM `match` where userId=? and travelId=? and flagGuider=1 and current=2";
 		List<Match> lm = Match.dao.find(sql,userId,travelId);
 		
 		DatumResponse response = new DatumResponse();
@@ -465,8 +465,7 @@ public class MatchAPIController extends BaseAPIController{
 			return;
 		}
 		match.update();
-		//将本次匹配的出游Id添加至user表
-		getUser().set("travelIdGuider", match.getTravelId()).update();
+		
 		
 		//将结果推送至出游者用户
 		/**
@@ -550,6 +549,7 @@ public class MatchAPIController extends BaseAPIController{
         	renderJson(response);
         	return;
         }else {
+    		
         	response.setDatum(lo);
         }
 		//保存数据
@@ -574,8 +574,12 @@ public class MatchAPIController extends BaseAPIController{
 		getUser().set("flag",2).update();
 		//将本次匹配的出游Id添加至user表
 		getUser().set("travelIdUser", travelId).update();
-		//清除当前出游者的聊天列表
-		
+
+		//将本次匹配的出游Id添加至user表
+    	for(int i = 0; i < lo.size(); i++){
+    		User.user.findFirst("select * from `user` where userId=?",lo.get(i).getUserId())
+    		.set("travelIdGuider", travelId).update();
+    	}
 		
         renderJson(response);	
 	}
