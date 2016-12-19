@@ -274,8 +274,11 @@ public class MatchAPIController extends BaseAPIController{
 			renderJson(new BaseResponse(Code.NO_TRAVEL_RECORED,"user has not yet issued a request!"));
     		return;
     	}
-		String sql = "SELECT * FROM `match` where userId=? and travelId=? and flagGuider=1 and current=2";
+		String sql = "SELECT * FROM `match` where userId=? and travelId=? and flagGuider=1 and current=3";
 		List<Match> lm = Match.dao.find(sql,userId,travelId);
+		if(lm.isEmpty()){
+			lm = Match.dao.find("SELECT * FROM `match` where userId=? and travelId=? and flagGuider=1 and current=2",userId,travelId);
+		}
 		
 		DatumResponse response = new DatumResponse();
 		if(lm.isEmpty()){

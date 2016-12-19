@@ -41,6 +41,10 @@ import java.util.Map;
 public class AccountAPIController extends BaseAPIController {
 	private static Log log = Log.getLog(AccountAPIController.class);
 	
+	public void isToken(){
+		renderJson(new BaseResponse(Code.SUCCESS,"token is available"));
+	}
+	
 	@Clear
 	public void getName(){
 		String collegeId = getPara("userId");
