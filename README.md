@@ -2,7 +2,7 @@
 实训项目“校脸”服务端,搭建api，通过jfinal极速开发框架搭建完成
 # 感谢
 * [Jfinal](http://www.jfinal.com/)
-* [jfinal脚手架项目] (https://github.com/lenbo-ma/jfinal-api-scaffold)
+* [jfinal脚手架项目](https://github.com/lenbo-ma/jfinal-api-scaffold)
 
 ### 资源
 
